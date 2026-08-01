@@ -5,15 +5,18 @@ Stroke Detection Project
 
 import os
 import tensorflow as tf
+import pickle
 
 from dataset import load_datasets
 from model import create_model
 from config import EPOCHS, LEARNING_RATE, MODEL_PATH
 
 # ===============================
-# Create models folder
+# Create folders
 # ===============================
+
 os.makedirs("models", exist_ok=True)
+os.makedirs("results", exist_ok=True)
 
 print("=" * 60)
 print("Loading Dataset...")
@@ -24,22 +27,32 @@ train_dataset, val_dataset, test_dataset, class_names = load_datasets()
 print("\n========================")
 print("CLASS NAMES:", class_names)
 print("========================\n")
-exit()
 
 print("\nClasses:", class_names)
 
 # ===============================
 # Improve Dataset Performance
 # ===============================
+
 AUTOTUNE = tf.data.AUTOTUNE
 
 train_dataset = train_dataset.cache().shuffle(1000).prefetch(AUTOTUNE)
 val_dataset = val_dataset.cache().prefetch(AUTOTUNE)
 test_dataset = test_dataset.cache().prefetch(AUTOTUNE)
 
+# ===============================
+# Create Model
+# ===============================
+
 print("\nCreating Model...")
 
 model = create_model()
+
+print("\n✅ Model Created Successfully!")
+
+# ===============================
+# Compile Model
+# ===============================
 
 print("\nCompiling Model...")
 
@@ -50,6 +63,8 @@ model.compile(
     loss="categorical_crossentropy",
     metrics=["accuracy"]
 )
+
+print("\n✅ Model Compiled Successfully!")
 
 print("\nModel Summary:\n")
 model.summary()
@@ -86,9 +101,13 @@ reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(
 # ===============================
 
 class_weight = {
-    0: 1.0,   # Normal
-    1: 1.63   # Stroke
+    0: 1.0,
+    1: 1.63
 }
+
+# ===============================
+# Train Model
+# ===============================
 
 print("\nStarting Training...\n")
 
@@ -101,19 +120,22 @@ history = model.fit(
         early_stop,
         reduce_lr
     ],
+    class_weight=class_weight,
     verbose=1
 )
 
-import pickle
-
-os.makedirs("results", exist_ok=True)
+# ===============================
+# Save Training History
+# ===============================
 
 with open("results/history.pkl", "wb") as f:
     pickle.dump(history.history, f)
 
-print("\nTraining history saved successfully!")
+print("\nTraining History Saved Successfully!")
 
-print("\nTraining Completed Successfully!")
+# ===============================
+# Evaluate Model
+# ===============================
 
 print("\nEvaluating Model...")
 
@@ -123,3 +145,5 @@ print(f"\nTest Accuracy : {accuracy*100:.2f}%")
 print(f"Test Loss     : {loss:.4f}")
 
 print("\nModel saved at:", MODEL_PATH)
+
+print("\n✅ Training Completed Successfully!")

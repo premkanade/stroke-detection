@@ -14,7 +14,7 @@ BATCH_SIZE = 32
 NUM_CLASSES = 2
 
 # Epochs
-EPOCHS = 10
+EPOCHS = 20
 
 # Learning Rate
 LEARNING_RATE = 0.0003

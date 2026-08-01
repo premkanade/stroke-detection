@@ -31,7 +31,17 @@ def create_model():
         input_tensor=x
     )
 
-    base_model.trainable = False
+    # Fine-tuning
+    base_model.trainable = True
+
+    # Freeze all layers except the last 30
+    for layer in base_model.layers[:-30]:
+        layer.trainable = False
+
+    print("\nTrainable Layers:\n")
+
+    for layer in base_model.layers[-30:]:
+        print(layer.name, layer.trainable)
 
     # Classification Head
     x = base_model.output

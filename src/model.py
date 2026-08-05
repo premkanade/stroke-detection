@@ -16,11 +16,21 @@ def create_model():
     # Input Layer
     inputs = layers.Input(shape=(IMG_HEIGHT, IMG_WIDTH, 3))
 
+    # ==========================================
     # Data Augmentation
-    x = layers.RandomFlip("horizontal")(inputs)
-    x = layers.RandomRotation(0.10)(x)
-    x = layers.RandomZoom(0.10)(x)
+    # ==========================================
 
+    data_augmentation = tf.keras.Sequential([
+        layers.RandomRotation(0.05),
+        layers.RandomZoom(0.10),
+        layers.RandomContrast(0.10),
+        layers.RandomTranslation(
+            height_factor=0.05,
+            width_factor=0.05
+        ),
+    ], name="data_augmentation")
+
+    x = data_augmentation(inputs)
     # EfficientNet preprocessing
     x = layers.Lambda(preprocess_input, name="preprocess")(x)
 
@@ -34,21 +44,39 @@ def create_model():
     # Fine-tuning
     base_model.trainable = True
 
-    # Freeze all layers except the last 30
-    for layer in base_model.layers[:-30]:
+    # Freeze all layers except the last 20
+    for layer in base_model.layers[:-20]:
         layer.trainable = False
 
     print("\nTrainable Layers:\n")
 
-    for layer in base_model.layers[-30:]:
+    for layer in base_model.layers[-20:]:
         print(layer.name, layer.trainable)
 
+    # ==========================================
     # Classification Head
+    # ==========================================
+
     x = base_model.output
+
     x = layers.GlobalAveragePooling2D()(x)
+
     x = layers.BatchNormalization()(x)
-    x = layers.Dropout(0.4)(x)
-    x = layers.Dense(256, activation="relu")(x)
+
+    x = layers.Dense(
+        512,
+        activation="relu",
+        kernel_regularizer=tf.keras.regularizers.l2(0.0001)
+    )(x)
+
+    x = layers.Dropout(0.5)(x)
+
+    x = layers.Dense(
+        256,
+        activation="relu",
+        kernel_regularizer=tf.keras.regularizers.l2(0.0001)
+    )(x)
+
     x = layers.Dropout(0.3)(x)
 
     outputs = layers.Dense(

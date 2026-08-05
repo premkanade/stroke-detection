@@ -111,7 +111,7 @@ with col1:
 with col2:
     st.metric(
         "🎯 Accuracy",
-        "76%"
+        "80%"
     )
 
 with col3:
@@ -149,7 +149,7 @@ st.sidebar.info(
 - Normal
 - Stroke
 
-**Test Accuracy:** 76%
+**Test Accuracy:** 80%
 
 **Framework**
 - TensorFlow

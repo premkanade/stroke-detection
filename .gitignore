@@ -4,3 +4,21 @@ __pycache__/
 .vscode/
 .idea/
 results/
+# Generated PDF reports
+stroke_report.pdf
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+
+# Streamlit cache
+.streamlit/
+
+# VS Code
+.vscode/
+
+# TensorBoard logs
+logs/

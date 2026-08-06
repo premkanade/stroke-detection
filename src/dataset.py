@@ -22,7 +22,8 @@ def load_datasets():
         image_size=(IMG_HEIGHT, IMG_WIDTH),
         batch_size=BATCH_SIZE,
         label_mode="categorical",
-        shuffle=True
+        shuffle=True,
+        seed=42
     )
 
     validation_dataset = tf.keras.utils.image_dataset_from_directory(
@@ -30,7 +31,8 @@ def load_datasets():
         image_size=(IMG_HEIGHT, IMG_WIDTH),
         batch_size=BATCH_SIZE,
         label_mode="categorical",
-        shuffle=True
+        shuffle=True,
+        seed=42
     )
 
     test_dataset = tf.keras.utils.image_dataset_from_directory(

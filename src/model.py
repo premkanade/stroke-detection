@@ -45,7 +45,7 @@ def create_model():
     base_model.trainable = True
 
     # Freeze all layers except the last 20
-    for layer in base_model.layers[:-20]:
+    for layer in base_model.layers[:-30]:
         layer.trainable = False
 
     print("\nTrainable Layers:\n")

@@ -6,10 +6,22 @@ Stroke Detection Project
 import os
 import tensorflow as tf
 import pickle
+import random
+import numpy as np
 
 from dataset import load_datasets
 from model import create_model
 from config import EPOCHS, LEARNING_RATE, MODEL_PATH
+
+# ==========================================
+# Random Seed
+# ==========================================
+
+SEED = 42
+
+random.seed(SEED)
+np.random.seed(SEED)
+tf.random.set_seed(SEED)
 
 # ===============================
 # Create folders
@@ -56,11 +68,15 @@ print("\n✅ Model Created Successfully!")
 
 print("\nCompiling Model...")
 
+loss = tf.keras.losses.CategoricalCrossentropy(
+    label_smoothing=0.1
+)
+
 model.compile(
     optimizer=tf.keras.optimizers.Adam(
         learning_rate=LEARNING_RATE
     ),
-    loss="categorical_crossentropy",
+    loss=loss,
     metrics=["accuracy"]
 )
 

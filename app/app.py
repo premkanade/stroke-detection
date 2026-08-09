@@ -85,7 +85,11 @@ st.markdown("""
 
 <h1>🧠 AI-Based Stroke Detection System</h1>
 
-<h4>Brain CT Image Classification using EfficientNetB0</h4>
+<h4>Brain CT Image Classification using Deep Learning</h4>
+
+<p>
+EfficientNetB0 • ResNet50 • DenseNet121 • MobileNetV2 • CNN
+</p>
 
 <p>
 Deep Learning • Explainable AI • Medical Image Analysis
@@ -96,103 +100,15 @@ Deep Learning • Explainable AI • Medical Image Analysis
 
 st.write("")
 
-st.markdown("---")
-
-st.subheader("📊 Model Dashboard")
-
-col1, col2, col3, col4 = st.columns(4)
-
-with col1:
-    st.metric(
-        "🤖 Model",
-        "EfficientNetB0"
-    )
-
-with col2:
-    st.metric(
-        "🎯 Accuracy",
-        "80%"
-    )
-
-with col3:
-    st.metric(
-        "🧠 Classes",
-        "2"
-    )
-
-with col4:
-    st.metric(
-        "📷 Input",
-        "224×224"
-    )
-
-st.markdown("---")
-
 # ==========================================
-# Sidebar
-# ==========================================
-
-st.sidebar.title("🧠 Stroke Detection")
-
-
-st.sidebar.markdown("---")
-
-st.sidebar.info(
-"""
-### Model Information
-
-**Model:** EfficientNetB0
-
-**Dataset:** Brain CT Images
-
-**Classes**
-- Normal
-- Stroke
-
-**Test Accuracy:** 80%
-
-**Framework**
-- TensorFlow
-- Streamlit
-"""
-)
-
-st.sidebar.markdown("---")
-
-st.sidebar.success(
-"Upload a Brain CT Scan to receive an AI prediction."
-)
-
-st.sidebar.markdown("---")
-
-st.sidebar.subheader("📖 About Project")
-
-st.sidebar.write("""
-This application uses **EfficientNetB0** to detect **Stroke** from Brain CT images.
-
-### Features
-- 🧠 Stroke Detection
-- 📊 Confidence Score
-- 📈 Prediction Probabilities
-- 🔥 Grad-CAM Visualization
-
-### Technology
-- TensorFlow
-- EfficientNetB0
-- Streamlit
-
-**Note:** This application is developed for educational and research purposes.
-""")
-
-# ==========================================
-# Load Model
+# Load Multiple Models
 # ==========================================
 
 @st.cache_resource
-def load_my_model():
+def load_my_model(model_path):
 
     model = load_model(
-        "models/stroke_detection_model.keras",
+        model_path,
         custom_objects={
             "preprocess_input": preprocess_input
         },
@@ -202,8 +118,142 @@ def load_my_model():
     return model
 
 
-model = load_my_model()
+# ==========================================
+# Available Models
+# ==========================================
+
+MODEL_PATHS = {
+    "EfficientNetB0": "models/stroke_detection_model.keras",
+    "CNN": "models/cnn.keras",
+    "ResNet50": "models/resnet50.keras",
+    "DenseNet121": "models/densenet121.keras",
+    "MobileNetV2": "models/mobilenetv2.keras"
+}
+
+# Verified test accuracies from the latest evaluation logs.
+# CNN is intentionally left unverified rather than assigning a guessed value.
+MODEL_ACCURACIES = {
+    "EfficientNetB0": 85.41,
+    "CNN": 62.07,
+    "ResNet50": 80.64,
+    "DenseNet121": 81.96,
+    "MobileNetV2": 64.19
+}
+
 classes = ["Normal", "Stroke"]
+
+# ==========================================
+# Model Selection
+# ==========================================
+
+st.markdown("---")
+st.subheader("🤖 Select Deep Learning Model")
+
+selected_model_name = st.selectbox(
+    "Choose a model for prediction:",
+    list(MODEL_PATHS.keys())
+)
+
+selected_model_path = MODEL_PATHS[selected_model_name]
+model = load_my_model(selected_model_path)
+
+selected_accuracy = MODEL_ACCURACIES[selected_model_name]
+accuracy_display = (
+    f"{selected_accuracy:.2f}%"
+    if selected_accuracy is not None
+    else "Not verified"
+)
+
+# ==========================================
+# Model Dashboard
+# ==========================================
+
+st.markdown("---")
+st.subheader("📊 Model Dashboard")
+
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+    st.metric("🤖 Model", selected_model_name)
+
+with col2:
+    st.metric("🎯 Test Accuracy", accuracy_display)
+
+with col3:
+    st.metric("🧠 Classes", "2")
+
+with col4:
+    st.metric("📷 Input", "224×224")
+
+st.info(f"Selected Model: **{selected_model_name}**")
+
+st.markdown("---")
+
+# ==========================================
+# Sidebar
+# ==========================================
+
+st.sidebar.title("🧠 Stroke Detection")
+
+st.sidebar.markdown("---")
+
+st.sidebar.info(f"""
+### Model Information
+
+**Selected Model:** {selected_model_name}
+
+**Dataset:** Brain CT Images
+
+**Classes**
+- Normal
+- Stroke
+
+**Test Accuracy:** {accuracy_display}
+
+**Framework**
+- TensorFlow
+- Streamlit
+""")
+
+st.sidebar.markdown("---")
+
+st.sidebar.success(
+    "Upload a Brain CT Scan to receive an AI prediction."
+)
+
+st.sidebar.markdown("---")
+
+st.sidebar.subheader("📖 About Project")
+
+st.sidebar.write(f"""
+This application compares multiple deep learning models for **Stroke Detection**
+from Brain CT images.
+
+### Available Models
+- EfficientNetB0
+- ResNet50
+- DenseNet121
+- MobileNetV2
+- CNN
+
+### Features
+- 🧠 Stroke Detection
+- 📊 Confidence Score
+- 📈 Prediction Probabilities
+- 🔥 Grad-CAM Visualization
+- 📄 PDF Report Generation
+
+### Technology
+- TensorFlow
+- Streamlit
+- OpenCV
+- NumPy
+- Pillow
+- Plotly
+
+**Note:** This application is developed for educational and research purposes.
+It should not be used as a substitute for professional medical diagnosis.
+""")
 
 # ==========================================
 # Prediction History
@@ -221,29 +271,41 @@ with st.expander("ℹ️ About This Application", expanded=False):
     st.markdown("""
 ### 🧠 AI-Based Stroke Detection System
 
-This application detects **Stroke** from Brain CT images using the **EfficientNetB0** deep learning model.
+This application detects **Stroke** from Brain CT images using multiple
+deep learning models.
+
+### Available Models
+
+- EfficientNetB0
+- ResNet50
+- DenseNet121
+- MobileNetV2
+- CNN
 
 ### Workflow
 
-1️⃣ Upload a Brain CT Scan
+1️⃣ Select a Deep Learning Model
 
-2️⃣ Image is preprocessed
+2️⃣ Upload a Brain CT Scan
 
-3️⃣ EfficientNetB0 analyzes the CT scan
+3️⃣ Image is preprocessed according to the selected model
 
-4️⃣ AI predicts:
+4️⃣ The selected model analyzes the CT scan
+
+5️⃣ AI predicts:
 - 🟢 Normal
 - 🔴 Stroke
 
-5️⃣ Confidence score and prediction probabilities are displayed
+6️⃣ Confidence score and prediction probabilities are displayed
 
-6️⃣ Grad-CAM highlights the regions that influenced the prediction
+7️⃣ Grad-CAM highlights the regions that influenced the prediction
 
 ---
 
 ### ⚠️ Disclaimer
 
-This application is developed for **educational and research purposes only**. It should not be used as a substitute for professional medical diagnosis.
+This application is developed for **educational and research purposes only**.
+It should not be used as a substitute for professional medical diagnosis.
 """)
 # ==========================================
 # Workflow
@@ -346,14 +408,33 @@ if uploaded_file is not None:
         with col2:
         # Grad-CAM image will appear here
             pass
-        # Preprocess image
-        img = image.resize((224, 224))
-        img = np.array(img)
-        from tensorflow.keras.applications.efficientnet import preprocess_input
-        img = img.astype(np.float32)
-        img = preprocess_input(img)
-        img = np.expand_dims(img, axis=0)
+        # ==========================================
+        # Preprocess Image According to Selected Model
+        # ==========================================
 
+        img = image.resize((224, 224))
+        img = np.array(img).astype(np.float32)
+
+        if selected_model_name == "EfficientNetB0":
+            from tensorflow.keras.applications.efficientnet import preprocess_input
+            img = preprocess_input(img)
+
+        elif selected_model_name == "ResNet50":
+            from tensorflow.keras.applications.resnet50 import preprocess_input
+            img = preprocess_input(img)
+
+        elif selected_model_name == "DenseNet121":
+            from tensorflow.keras.applications.densenet import preprocess_input
+            img = preprocess_input(img)
+
+        elif selected_model_name == "MobileNetV2":
+            from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+            img = preprocess_input(img)
+
+        elif selected_model_name == "CNN":
+            img = img / 255.0
+
+        img = np.expand_dims(img, axis=0)
         # Prediction
         with st.spinner("🧠 AI is analysing the Brain CT Scan..."):
 
@@ -364,10 +445,10 @@ if uploaded_file is not None:
         import time
 
         steps = [
-            "Loading EfficientNetB0...",
+            f"Loading {selected_model_name}...",
             "Preprocessing Image...",
-            "Extracting Features...",
-            "Running AI Model...",
+            f"Extracting Features using {selected_model_name}...",
+            f"Running {selected_model_name}...",
             "Generating Prediction...",
             "Preparing Explainable AI..."
         ]
@@ -395,6 +476,10 @@ if uploaded_file is not None:
             "Confidence": f"{confidence:.2f}%"
         }
 
+        # Calculate probabilities for every prediction
+        normal_prob = prediction[0][0] * 100
+        stroke_prob = prediction[0][1] * 100
+
         # Avoid duplicate consecutive entries
         if (
             len(st.session_state.history) == 0 or
@@ -402,11 +487,6 @@ if uploaded_file is not None:
             st.session_state.history[-1]["Confidence"] != f"{confidence:.2f}%"
         ):
             st.session_state.history.append(new_record)
-
-            normal_prob = prediction[0][0] * 100
-            stroke_prob = prediction[0][1] * 100
-
-            classes = ["Normal", "Stroke"]
     
         # ======================================
         # Generate PDF Report
@@ -608,16 +688,28 @@ if uploaded_file is not None:
 
         <p>
         This AI-powered application detects Stroke from Brain CT Scan images using
-        the EfficientNetB0 Deep Learning model.
+        multiple deep learning models. The currently selected model is
+        <b>{selected_model_name}</b>.
         </p>
+
+        <h4>Available Models</h4>
+
+        <ul>
+        <li>✅ EfficientNetB0</li>
+        <li>✅ ResNet50</li>
+        <li>✅ DenseNet121</li>
+        <li>✅ MobileNetV2</li>
+        <li>✅ CNN</li>
+        </ul>
 
         <h4>Key Features</h4>
 
         <ul>
         <li>✅ Stroke Detection</li>
-        <li>✅ EfficientNetB0 Transfer Learning</li>
+        <li>✅ Multiple Deep Learning Models</li>
         <li>✅ Grad-CAM Explainable AI</li>
         <li>✅ Confidence Analysis</li>
+        <li>✅ Prediction Probability Analysis</li>
         <li>✅ PDF Report Generation</li>
         <li>✅ Interactive Dashboard</li>
         </ul>
@@ -626,11 +718,11 @@ if uploaded_file is not None:
 
         <ul>
         <li>TensorFlow</li>
-        <li>EfficientNetB0</li>
         <li>Streamlit</li>
         <li>OpenCV</li>
         <li>NumPy</li>
         <li>Pillow</li>
+        <li>Plotly</li>
         <li>ReportLab</li>
         </ul>
 
@@ -682,7 +774,8 @@ st.markdown("""
 
 ### 🧠 AI-Based Stroke Detection System
 
-Developed using <b>TensorFlow</b>, <b>EfficientNetB0</b>, and <b>Streamlit</b>
+Developed using <b>TensorFlow</b>, multiple deep learning models,
+<b>Explainable AI</b>, and <b>Streamlit</b>
 
 © 2026 Final Year Project
 
